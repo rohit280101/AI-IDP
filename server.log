@@ -1,0 +1,28 @@
+🚀 Starting AI-IDP Server...
+
+📋 Checking for existing processes on port 8000...
+✅ Port 8000 is available
+
+🔍 Environment Info:
+   Python: Python 3.13.9
+   Location: /Users/rohitgupta/miniconda3/bin/python
+   Uvicorn: Running uvicorn 0.40.0 with CPython 3.13.9 on Darwin
+
+🔧 Starting server on http://localhost:8000
+📚 API Documentation: http://localhost:8000/docs
+🔄 Hot reload: ENABLED
+
+Press Ctrl+C to stop the server
+
+INFO:     Will watch for changes in these directories: ['/Users/rohitgupta/repositories/AI-IDP']
+INFO:     Uvicorn running on http://0.0.0.0:8000 (Press CTRL+C to quit)
+INFO:     Started reloader process [8415] using StatReload
+INFO:     Started server process [8417]
+INFO:     Waiting for application startup.
+INFO:     Application startup complete.
+INFO:     127.0.0.1:64337 - "GET /api/v1/health HTTP/1.1" 200 OK
+INFO:     127.0.0.1:64343 - "GET / HTTP/1.1" 404 Not Found
+INFO:     127.0.0.1:64366 - "GET /favicon.ico HTTP/1.1" 404 Not Found
+INFO:     127.0.0.1:64373 - "GET /docs HTTP/1.1" 200 OK
+INFO:     127.0.0.1:64373 - "GET /api/v1/openapi.json HTTP/1.1" 200 OK
+./scripts/start_server.sh: line 40:  8415 Killed: 9               $PYTHON_CMD -m uvicorn app.main:app --reload --host 0.0.0.0 --port 8000

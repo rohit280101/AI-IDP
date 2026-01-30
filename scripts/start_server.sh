@@ -19,11 +19,14 @@ else
     echo "✅ Port 8000 is available"
 fi
 
+# Use Python 3.13 from miniconda (compatible with SQLAlchemy)
+PYTHON_CMD="/Users/rohitgupta/miniconda3/bin/python"
+
 echo ""
 echo "🔍 Environment Info:"
-echo "   Python: $(python --version)"
-echo "   Location: $(which python)"
-echo "   Uvicorn: $(python -m uvicorn --version 2>&1 | head -1)"
+echo "   Python: $($PYTHON_CMD --version)"
+echo "   Location: $PYTHON_CMD"
+echo "   Uvicorn: $($PYTHON_CMD -m uvicorn --version 2>&1 | head -1)"
 
 echo ""
 echo "🔧 Starting server on http://localhost:8000"
@@ -34,4 +37,4 @@ echo "Press Ctrl+C to stop the server"
 echo ""
 
 # Start the server
-python -m uvicorn app.main:app --reload --host 0.0.0.0 --port 8000
+$PYTHON_CMD -m uvicorn app.main:app --reload --host 0.0.0.0 --port 8000
