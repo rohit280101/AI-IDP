@@ -6,12 +6,17 @@ from app.services.ocr_service import extract_text
 from app.services.nlp_service import clean_text
 from app.services.embedding_service import generate_embeddings
 import logging
+import time 
 
 logger = logging.getLogger(__name__)
 
 def process_document(document_id: int):
+    start_time = time.perf_counter()
     db: Session = SessionLocal()
-
+    logger.info(
+    f"Started processing document {document_id}",
+    extra={"trace_id": f"doc-{document_id}"}
+)
     try:
         document = db.query(Document).filter(Document.id == document_id).first()
         if not document:
@@ -31,8 +36,9 @@ def process_document(document_id: int):
 
         document.status = "completed"
         db.commit()
+        duration = time.perf_counter() - start_time
 
-        logger.info(f"Document {document_id} processed successfully")
+        logger.info(f"Document {document_id} processed successfully in {duration:.2f}s",extra={"trace_id": f"doc-{document_id}"}) 
 
     except Exception as e:
         document.status = "failed"
