@@ -2,6 +2,10 @@ from fastapi import FastAPI
 from app.core.config import settings
 from app.core.logging import setup_logging
 from app.api.v1 import api_router
+from app.api.v1 import documents
+
+
+
 from app.db.base import Base
 from app.db.session import engine
 from app.db import models  # noqa: F401 - Import models to register them
@@ -18,3 +22,4 @@ app = FastAPI(
 )
 
 app.include_router(api_router, prefix=settings.API_V1_STR)
+app.include_router(documents.router, prefix="/api/v1")
