@@ -5,8 +5,8 @@
 echo "🚀 Starting AI-IDP Server..."
 echo ""
 
-# Navigate to project directory
-cd /Users/rohitgupta/repositories/AI-IDP
+# Navigate to backend directory
+cd /Users/rohitgupta/repositories/AI-IDP/ai-idp-backend
 
 # Kill any existing server on port 8000
 echo "📋 Checking for existing processes on port 8000..."
@@ -37,4 +37,5 @@ echo "Press Ctrl+C to stop the server"
 echo ""
 
 # Start the server
+PYTHONPATH="/Users/rohitgupta/repositories/AI-IDP/ai-idp-backend" \
 $PYTHON_CMD -m uvicorn app.main:app --reload --host 0.0.0.0 --port 8000
