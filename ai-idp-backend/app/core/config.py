@@ -18,6 +18,12 @@ class Settings(BaseSettings):
 
     REDIS_URL: str = os.getenv("REDIS_URL", "redis://localhost:6379/0")
 
+    # Rate limiting settings
+    UPLOAD_RATE_LIMIT: int = int(os.getenv("UPLOAD_RATE_LIMIT", "10"))  # requests
+    UPLOAD_RATE_WINDOW: int = int(os.getenv("UPLOAD_RATE_WINDOW", "60"))  # seconds
+    SEARCH_RATE_LIMIT: int = int(os.getenv("SEARCH_RATE_LIMIT", "30"))  # requests
+    SEARCH_RATE_WINDOW: int = int(os.getenv("SEARCH_RATE_WINDOW", "60"))  # seconds
+
     class Config:
         env_file = ".env"
         extra = "ignore"  # Ignore extra fields from .env file

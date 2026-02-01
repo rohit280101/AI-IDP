@@ -6,6 +6,8 @@ from app.services.document_service import upload_document
 from app.schemas.document import DocumentResponse
 from app.api.v1.auth import get_current_user
 from fastapi import BackgroundTasks
+from app.core.rate_limiter import RateLimitDependency
+from app.core.config import settings
 import logging
 
 logger = logging.getLogger(__name__)
@@ -30,6 +32,12 @@ async def upload(
     file: UploadFile = File(...),
     db: Session = Depends(get_db),
     current_user=Depends(get_current_user),
+    rate_limit_headers: dict = Depends(
+        RateLimitDependency(
+            max_requests=settings.UPLOAD_RATE_LIMIT,
+            window=settings.UPLOAD_RATE_WINDOW
+        )
+    ),
 ):
     logger.info("Document upload request received")
     from app.workers.tasks import process_document
