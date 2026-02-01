@@ -13,6 +13,16 @@ class TraceIdFilter(logging.Filter):
         return True
 
 def setup_logging():
+    old_factory = logging.getLogRecordFactory()
+
+    def record_factory(*args, **kwargs):
+        record = old_factory(*args, **kwargs)
+        if not hasattr(record, "trace_id"):
+            record.trace_id = "N/A"
+        return record
+
+    logging.setLogRecordFactory(record_factory)
+
     handler = logging.StreamHandler(sys.stdout)
     handler.setFormatter(logging.Formatter(LOG_FORMAT))
 

@@ -31,10 +31,7 @@ async def upload(
     db: Session = Depends(get_db),
     current_user=Depends(get_current_user),
 ):
-    logger.info(
-        "Document upload request received",
-        extra={"trace_id": request.state.trace_id}
-    )
+    logger.info("Document upload request received")
     from app.workers.tasks import process_document
     
     doc = await upload_document(db, current_user.id, file)
@@ -43,9 +40,6 @@ async def upload(
         process_document,
         document_id=doc.id
     )
-    logger.info(
-        f"Document {doc.id} queued for processing",
-        extra={"trace_id": request.state.trace_id}
-    )
+    logger.info(f"Document {doc.id} queued for processing")
 
     return doc

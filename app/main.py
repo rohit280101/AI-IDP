@@ -11,8 +11,11 @@ from app.db.session import engine
 from app.db import models  # noqa: F401 - Import models to register them
 from fastapi import Response
 from prometheus_client import CONTENT_TYPE_LATEST, generate_latest
+import logging
+import threading
 
 setup_logging()
+logger = logging.getLogger(__name__)
 
 # Create database tables on startup
 Base.metadata.create_all(bind=engine)
@@ -23,6 +26,26 @@ app = FastAPI(
     docs_url="/docs",
 )
 
+@app.on_event("startup")
+def startup():
+    """Startup event - pre-load AI models in background thread"""
+    logger.info("Server starting up...")
+    
+    # Load AI models in a background thread to avoid blocking startup
+    def load_models_bg():
+        try:
+            from app.core.ai_models import load_models
+            logger.info("Pre-loading AI models...")
+            load_models()
+            logger.info("AI models pre-loaded successfully")
+        except Exception as e:
+            logger.warning(f"AI models will be loaded on-demand: {e}")
+            # Don't fail startup, models will load on first use
+    
+    model_loader = threading.Thread(target=load_models_bg, daemon=True)
+    model_loader.start()
+    
+    logger.info("Server startup complete")
 
 @app.get("/metrics")
 def metrics():

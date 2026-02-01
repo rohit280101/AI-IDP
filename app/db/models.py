@@ -1,4 +1,4 @@
-from sqlalchemy import Column, Integer, String, Boolean , DateTime, ForeignKey
+from sqlalchemy import JSON, Column, Integer, String, Boolean , DateTime, ForeignKey ,Text
 from sqlalchemy.sql import func
 from app.db.base import Base
 
@@ -22,5 +22,8 @@ class Document(Base):
     storage_path = Column(String, nullable=False)
 
     status = Column(String, default="uploaded")
-
+    raw_text = Column(Text, nullable=True)
+    cleaned_text = Column(Text, nullable=True)
+    embedding_status = Column(String, default="pending")
+    classification = Column(JSON, nullable=True)
     created_at = Column(DateTime(timezone=True), server_default=func.now())
