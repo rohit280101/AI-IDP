@@ -4,7 +4,7 @@ from app.core.logging import setup_logging
 from app.api.v1 import api_router
 from app.api.v1 import documents
 
-from app.core.middleware import add_trace_id
+from app.core.middleware import add_timing, add_trace_id
 from app.core.metrics_middleware import metrics_middleware
 from app.db.base import Base
 from app.db.session import engine
@@ -13,6 +13,7 @@ from fastapi import Response
 from prometheus_client import CONTENT_TYPE_LATEST, generate_latest
 import logging
 import threading
+from app.core.vector_store import load_vector_store
 
 setup_logging()
 logger = logging.getLogger(__name__)
@@ -28,30 +29,33 @@ app = FastAPI(
 
 @app.on_event("startup")
 def startup():
-    """Startup event - pre-load AI models in background thread"""
+    """Startup event - pre-load AI models and vector store"""
     logger.info("Server starting up...")
     
-    # Load AI models in a background thread to avoid blocking startup
-    def load_models_bg():
-        try:
-            from app.core.ai_models import load_models
-            logger.info("Pre-loading AI models...")
-            load_models()
-            logger.info("AI models pre-loaded successfully")
-        except Exception as e:
-            logger.warning(f"AI models will be loaded on-demand: {e}")
-            # Don't fail startup, models will load on first use
+    # Load AI models synchronously to ensure they're ready
+    try:
+        from app.core.ai_models import load_models
+        logger.info("Pre-loading AI models...")
+        load_models()
+        logger.info("AI models pre-loaded successfully")
+    except Exception as e:
+        logger.warning(f"AI models will be loaded on-demand: {e}")
+        # Don't fail startup, models will load on first use
     
-    model_loader = threading.Thread(target=load_models_bg, daemon=True)
-    model_loader.start()
-    
+    # Load vector store
+    load_vector_store()
     logger.info("Server startup complete")
+
+
+
+
 
 @app.get("/metrics")
 def metrics():
     return Response(generate_latest(), media_type=CONTENT_TYPE_LATEST)
 
 app.middleware("http")(add_trace_id)
+app.middleware("http")(add_timing)
 app.middleware("http")(metrics_middleware)
 
 app.include_router(api_router, prefix=settings.API_V1_STR)
