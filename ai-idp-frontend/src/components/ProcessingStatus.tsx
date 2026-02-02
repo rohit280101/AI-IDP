@@ -14,7 +14,7 @@ const ProcessingStatus: React.FC<ProcessingStatusProps> = ({ documentId, onStatu
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    let intervalId: NodeJS.Timeout;
+    let intervalId: ReturnType<typeof setInterval>;
     let isMounted = true;
 
     const checkStatus = async () => {
@@ -23,8 +23,14 @@ const ProcessingStatus: React.FC<ProcessingStatusProps> = ({ documentId, onStatu
         
         if (!isMounted) return;
 
-        setStatus(response.embedding_status);
-        setClassification(response.classification);
+        setStatus(response.embedding_status || 'uploaded');
+        setClassification(
+          typeof response.classification === 'string'
+            ? response.classification
+            : response.classification
+              ? JSON.stringify(response.classification)
+              : undefined
+        );
         setLoading(false);
         setError(null);
 
@@ -62,9 +68,11 @@ const ProcessingStatus: React.FC<ProcessingStatusProps> = ({ documentId, onStatu
   const getStatusDisplay = () => {
     const statusConfig: Record<DocumentStatus, { label: string; icon: string; color: string }> = {
       uploaded: { label: 'Uploaded', icon: '📄', color: '#ffc107' },
+      pending: { label: 'Pending', icon: '⏳', color: '#ffc107' },
       processing: { label: 'Processing', icon: '⚙️', color: '#17a2b8' },
       completed: { label: 'Completed', icon: '✓', color: '#28a745' },
       failed: { label: 'Failed', icon: '✗', color: '#dc3545' },
+      skipped: { label: 'Skipped', icon: '⏭️', color: '#6c757d' },
     };
 
     return statusConfig[status] || statusConfig.uploaded;

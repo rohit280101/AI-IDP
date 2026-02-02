@@ -63,7 +63,7 @@ const DocumentUpload: React.FC<DocumentUploadProps> = ({ onUploadSuccess }) => {
       }
 
       if (onUploadSuccess) {
-        onUploadSuccess(response.document_id, response.filename);
+        onUploadSuccess(response.id, response.filename);
       }
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Upload failed. Please try again.');

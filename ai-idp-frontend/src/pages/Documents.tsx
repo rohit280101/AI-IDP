@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useRef, useState } from 'react';
 import DocumentUpload from '../components/DocumentUpload';
 import DocumentList from '../components/DocumentList';
 import ProcessingStatus from '../components/ProcessingStatus';
@@ -6,6 +6,7 @@ import ProcessingStatus from '../components/ProcessingStatus';
 const Documents: React.FC = () => {
   const [refreshTrigger, setRefreshTrigger] = useState(0);
   const [activeDocumentId, setActiveDocumentId] = useState<number | null>(null);
+  const lastStatusRef = useRef<string | null>(null);
 
   const handleUploadSuccess = (documentId: number) => {
     setActiveDocumentId(documentId);
@@ -32,8 +33,11 @@ const Documents: React.FC = () => {
               <ProcessingStatus
                 documentId={activeDocumentId}
                 onStatusChange={(status) => {
-                  if (status === 'completed' || status === 'failed') {
-                    setRefreshTrigger((prev) => prev + 1);
+                  if (status !== lastStatusRef.current) {
+                    lastStatusRef.current = status;
+                    if (status === 'completed' || status === 'failed') {
+                      setRefreshTrigger((prev) => prev + 1);
+                    }
                   }
                 }}
               />

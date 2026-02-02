@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { performSemanticSearch } from '../services/searchService';
+import { SearchResult } from '../types';
 
 interface SemanticSearchProps {
   onResultsFound?: (documentIds: number[]) => void;
@@ -8,7 +9,7 @@ interface SemanticSearchProps {
 const SemanticSearch: React.FC<SemanticSearchProps> = ({ onResultsFound }) => {
   const [query, setQuery] = useState('');
   const [limit, setLimit] = useState(10);
-  const [results, setResults] = useState<number[]>([]);
+  const [results, setResults] = useState<SearchResult[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [hasSearched, setHasSearched] = useState(false);
@@ -28,9 +29,9 @@ const SemanticSearch: React.FC<SemanticSearchProps> = ({ onResultsFound }) => {
     try {
       const response = await performSemanticSearch(query, limit);
       setResults(response.results);
-      
+
       if (onResultsFound) {
-        onResultsFound(response.results);
+        onResultsFound(response.results.map((result) => result.document_id));
       }
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Search failed. Please try again.');
@@ -140,13 +141,19 @@ const SemanticSearch: React.FC<SemanticSearchProps> = ({ onResultsFound }) => {
               </div>
 
               <div style={styles.resultsList}>
-                {results.map((docId, index) => (
-                  <div key={docId} style={styles.resultItem}>
+                {results.map((result, index) => (
+                  <div key={`${result.document_id}-${index}`} style={styles.resultItem}>
                     <div style={styles.resultRank}>#{index + 1}</div>
                     <div style={styles.resultContent}>
-                      <div style={styles.resultId}>Document ID: {docId}</div>
+                      <div style={styles.resultId}>Document ID: {result.document_id}</div>
+                      <div style={styles.resultSnippet}>{result.snippet}</div>
+                      {result.classification && (
+                        <div style={styles.resultClassification}>
+                          Classification: {result.classification}
+                        </div>
+                      )}
                       <div style={styles.resultMeta}>
-                        Relevance rank: {index + 1} of {results.length}
+                        Relevance rank: {index + 1} of {results.length} · Score: {result.score.toFixed(4)}
                       </div>
                     </div>
                   </div>
@@ -310,6 +317,16 @@ const styles: { [key: string]: React.CSSProperties } = {
     borderRadius: '8px',
     transition: 'box-shadow 0.2s, transform 0.2s',
     cursor: 'pointer',
+  },
+  resultSnippet: {
+    fontSize: '14px',
+    color: '#444',
+    marginTop: '6px',
+  },
+  resultClassification: {
+    fontSize: '12px',
+    color: '#007bff',
+    marginTop: '6px',
   },
   resultRank: {
     fontSize: '24px',

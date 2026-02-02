@@ -51,3 +51,37 @@ async def upload(
     logger.info(f"Document {doc.id} queued for processing")
 
     return doc
+
+
+@router.get("", response_model=list[DocumentResponse])
+async def list_documents(
+    db: Session = Depends(get_db),
+    current_user=Depends(get_current_user),
+    skip: int = 0,
+    limit: int = 100,
+):
+    """Get all documents for the current user"""
+    from app.db.models import Document
+    documents = db.query(Document).filter(
+        Document.owner_id == current_user.id
+    ).offset(skip).limit(limit).all()
+    return documents
+
+
+@router.get("/{document_id}", response_model=DocumentResponse)
+async def get_document(
+    document_id: int,
+    db: Session = Depends(get_db),
+    current_user=Depends(get_current_user),
+):
+    """Get a specific document by ID"""
+    from app.db.models import Document
+    document = db.query(Document).filter(
+        Document.id == document_id,
+        Document.owner_id == current_user.id
+    ).first()
+    
+    if not document:
+        raise HTTPException(status_code=404, detail="Document not found")
+    
+    return document

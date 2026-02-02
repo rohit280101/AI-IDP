@@ -1,5 +1,10 @@
 import { api } from './api';
-import { LoginRequest, LoginResponse, User } from '../types';
+import { LoginRequest, LoginResponse, RegisterRequest, RegisterResponse, User } from '../types';
+
+export const registerUser = async (credentials: RegisterRequest): Promise<RegisterResponse> => {
+  const response = await api.post<RegisterResponse>('/auth/register', credentials);
+  return response.data;
+};
 
 export const loginUser = async (credentials: LoginRequest): Promise<LoginResponse> => {
   // FastAPI OAuth2PasswordRequestForm expects application/x-www-form-urlencoded

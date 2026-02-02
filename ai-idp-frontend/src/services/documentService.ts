@@ -1,9 +1,10 @@
 import { api } from './api';
 import { Document, UploadResponse, DocumentStatusResponse } from '../types';
+import type { AxiosProgressEvent } from 'axios';
 
 export const uploadDocument = async (
   file: File,
-  onUploadProgress?: (progressEvent: ProgressEvent) => void
+  onUploadProgress?: (progressEvent: AxiosProgressEvent) => void
 ): Promise<UploadResponse> => {
   const formData = new FormData();
   formData.append('file', file);

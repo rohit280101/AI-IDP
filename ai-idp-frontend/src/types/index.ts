@@ -1,38 +1,35 @@
-export type DocumentStatus = 'uploaded' | 'processing' | 'completed' | 'failed';
+export type DocumentStatus = 'uploaded' | 'processing' | 'completed' | 'failed' | 'pending' | 'skipped';
 
 export interface Document {
   id: number;
   filename: string;
-  file_path: string;
-  file_size: number;
-  file_type: string;
-  upload_date: string;
+  status: string;
   embedding_status: DocumentStatus;
-  classification?: string;
-  raw_text?: string;
-  cleaned_text?: string;
+  classification?: unknown;
+  content_type: string;
+  created_at: string;
+  file_size?: number;
+  upload_date?: string;
 }
 
-export interface UploadResponse {
-  message: string;
-  document_id: number;
-  filename: string;
-}
+export interface UploadResponse extends Document {}
 
-export interface DocumentStatusResponse {
-  id: number;
-  filename: string;
-  embedding_status: DocumentStatus;
-  classification?: string;
-}
+export interface DocumentStatusResponse extends Document {}
 
 export interface SearchRequest {
   query: string;
   limit?: number;
 }
 
+export interface SearchResult {
+  document_id: number;
+  score: number;
+  snippet: string;
+  classification?: string | null;
+}
+
 export interface SearchResponse {
-  results: number[];
+  results: SearchResult[];
 }
 
 export interface ApiError {
@@ -45,10 +42,21 @@ export interface LoginRequest {
   password: string;
 }
 
+export interface RegisterRequest {
+  email: string;
+  password: string;
+}
+
 export interface LoginResponse {
   access_token: string;
   token_type: string;
   user_id?: number;
+}
+
+export interface RegisterResponse {
+  id: number;
+  email: string;
+  username?: string;
 }
 
 export interface User {
@@ -63,5 +71,6 @@ export interface AuthContextType {
   isAuthenticated: boolean;
   isLoading: boolean;
   login: (username: string, password: string) => Promise<void>;
+  register: (email: string, password: string) => Promise<void>;
   logout: () => void;
 }

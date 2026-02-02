@@ -10,11 +10,16 @@ interface DocumentListProps {
 const DocumentList: React.FC<DocumentListProps> = ({ refreshTrigger, onDocumentSelect }) => {
   const [documents, setDocuments] = useState<Document[]>([]);
   const [loading, setLoading] = useState(true);
+  const [isRefreshing, setIsRefreshing] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   const loadDocuments = async () => {
     try {
-      setLoading(true);
+      if (documents.length === 0) {
+        setLoading(true);
+      } else {
+        setIsRefreshing(true);
+      }
       setError(null);
       const fetchedDocuments = await fetchDocuments();
       setDocuments(fetchedDocuments);
@@ -22,6 +27,7 @@ const DocumentList: React.FC<DocumentListProps> = ({ refreshTrigger, onDocumentS
       setError(err instanceof Error ? err.message : 'Failed to fetch documents');
     } finally {
       setLoading(false);
+      setIsRefreshing(false);
     }
   };
 
@@ -29,17 +35,22 @@ const DocumentList: React.FC<DocumentListProps> = ({ refreshTrigger, onDocumentS
     loadDocuments();
   }, [refreshTrigger]);
 
-  const getStatusBadge = (status: string) => {
+  const getStatusBadge = (status?: string) => {
     const statusStyles: { [key: string]: React.CSSProperties } = {
       uploaded: { backgroundColor: '#ffc107', color: '#000' },
+      pending: { backgroundColor: '#ffc107', color: '#000' },
       processing: { backgroundColor: '#17a2b8', color: '#fff' },
       completed: { backgroundColor: '#28a745', color: '#fff' },
       failed: { backgroundColor: '#dc3545', color: '#fff' },
+      skipped: { backgroundColor: '#6c757d', color: '#fff' },
     };
 
+    const resolvedStatus = status || 'uploaded';
+    const resolvedStyle = statusStyles[resolvedStatus] || statusStyles.uploaded;
+
     return (
-      <span style={{ ...styles.badge, ...statusStyles[status] }}>
-        {status.toUpperCase()}
+      <span style={{ ...styles.badge, ...resolvedStyle }}>
+        {resolvedStatus.toUpperCase()}
       </span>
     );
   };
@@ -79,7 +90,7 @@ const DocumentList: React.FC<DocumentListProps> = ({ refreshTrigger, onDocumentS
       <div style={styles.header}>
         <h2 style={styles.title}>Documents</h2>
         <button onClick={loadDocuments} style={styles.refreshButton}>
-          🔄 Refresh
+          {isRefreshing ? 'Refreshing...' : '🔄 Refresh'}
         </button>
       </div>
 
@@ -95,27 +106,40 @@ const DocumentList: React.FC<DocumentListProps> = ({ refreshTrigger, onDocumentS
             </tr>
           </thead>
           <tbody>
-            {documents.map((doc) => (
+            {documents.map((doc) => {
+              const statusValue = doc.embedding_status || doc.status || 'uploaded';
+              const sizeText = typeof doc.file_size === 'number'
+                ? `${(doc.file_size / 1024).toFixed(2)} KB`
+                : '-';
+              const uploadDate = doc.created_at || doc.upload_date;
+              const classificationText = doc.classification
+                ? (typeof doc.classification === 'string'
+                    ? doc.classification
+                    : JSON.stringify(doc.classification))
+                : '-';
+
+              return (
               <tr
                 key={doc.id}
                 style={styles.tableRow}
                 onClick={() => onDocumentSelect && onDocumentSelect(doc.id)}
               >
                 <td style={styles.tableCell}>{doc.filename}</td>
-                <td style={styles.tableCell}>{getStatusBadge(doc.embedding_status)}</td>
+                <td style={styles.tableCell}>{getStatusBadge(statusValue)}</td>
                 <td style={styles.tableCell}>
-                  {doc.classification ? (
-                    <span style={styles.classificationTag}>{doc.classification}</span>
+                  {classificationText !== '-' ? (
+                    <span style={styles.classificationTag}>{classificationText}</span>
                   ) : (
                     <span style={styles.noneText}>-</span>
                   )}
                 </td>
-                <td style={styles.tableCell}>{(doc.file_size / 1024).toFixed(2)} KB</td>
+                <td style={styles.tableCell}>{sizeText}</td>
                 <td style={styles.tableCell}>
-                  {new Date(doc.upload_date).toLocaleString()}
+                  {uploadDate ? new Date(uploadDate).toLocaleString() : '-'}
                 </td>
               </tr>
-            ))}
+              );
+            })}
           </tbody>
         </table>
       </div>

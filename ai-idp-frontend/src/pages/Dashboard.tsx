@@ -79,12 +79,27 @@ const Dashboard: React.FC = () => {
                 </div>
                 {doc.classification && (
                   <div style={styles.documentClassification}>
-                    <strong>Classification:</strong> {doc.classification}
+                    <strong>Classification:</strong>{' '}
+                    <span>
+                      {typeof doc.classification === 'string'
+                        ? doc.classification
+                        : (JSON.stringify(doc.classification) + '')}
+                    </span>
                   </div>
                 )}
                 <div style={styles.documentMeta}>
-                  <div>Size: {(doc.file_size / 1024).toFixed(2)} KB</div>
-                  <div>Uploaded: {new Date(doc.upload_date).toLocaleDateString()}</div>
+                  <div>
+                    Size:{' '}
+                    {typeof doc.file_size === 'number'
+                      ? `${(doc.file_size / 1024).toFixed(2)} KB`
+                      : '-'}
+                  </div>
+                  <div>
+                    Uploaded:{' '}
+                    {doc.created_at || doc.upload_date
+                      ? new Date(doc.created_at || doc.upload_date!).toLocaleDateString()
+                      : '-'}
+                  </div>
                 </div>
               </div>
             ))}

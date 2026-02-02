@@ -1,13 +1,14 @@
 import React, { useState } from 'react';
 import { useAuth } from '../context/AuthContext';
-import { Redirect, Link } from 'react-router-dom';
+import { Link, Redirect } from 'react-router-dom';
 
-const Login: React.FC = () => {
-  const [username, setUsername] = useState('');
+const Register: React.FC = () => {
+  const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
   const [error, setError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
-  const { login, isAuthenticated } = useAuth();
+  const { register, isAuthenticated } = useAuth();
 
   if (isAuthenticated) {
     return <Redirect to="/" />;
@@ -19,14 +20,24 @@ const Login: React.FC = () => {
     setIsLoading(true);
 
     try {
-      if (!username.trim() || !password.trim()) {
-        setError('Please enter both username and password');
+      if (!email.trim() || !password.trim()) {
+        setError('Please enter both email and password');
         return;
       }
 
-      await login(username, password);
+      if (password !== confirmPassword) {
+        setError('Passwords do not match');
+        return;
+      }
+
+      if (password.length < 6) {
+        setError('Password must be at least 6 characters');
+        return;
+      }
+
+      await register(email, password);
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Login failed. Please try again.');
+      setError(err instanceof Error ? err.message : 'Registration failed. Please try again.');
     } finally {
       setIsLoading(false);
     }
@@ -36,21 +47,22 @@ const Login: React.FC = () => {
     <div style={styles.container}>
       <div style={styles.formContainer}>
         <div style={styles.header}>
-          <h1 style={styles.title}>🔐 AI-IDP Login</h1>
-          <p style={styles.subtitle}>Intelligent Document Processing</p>
+          <h1 style={styles.title}>📝 Create Account</h1>
+          <p style={styles.subtitle}>Join AI-IDP</p>
         </div>
 
         <form onSubmit={handleSubmit} style={styles.form}>
           <div style={styles.formGroup}>
-            <label style={styles.label}>Username</label>
+            <label style={styles.label}>Email</label>
             <input
-              type="text"
-              value={username}
-              onChange={(e) => setUsername(e.target.value)}
-              placeholder="Enter your username"
+              type="email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              placeholder="Enter your email"
               style={styles.input}
               disabled={isLoading}
               autoFocus
+              required
             />
           </div>
 
@@ -63,6 +75,20 @@ const Login: React.FC = () => {
               placeholder="Enter your password"
               style={styles.input}
               disabled={isLoading}
+              required
+            />
+          </div>
+
+          <div style={styles.formGroup}>
+            <label style={styles.label}>Confirm Password</label>
+            <input
+              type="password"
+              value={confirmPassword}
+              onChange={(e) => setConfirmPassword(e.target.value)}
+              placeholder="Confirm your password"
+              style={styles.input}
+              disabled={isLoading}
+              required
             />
           </div>
 
@@ -74,25 +100,22 @@ const Login: React.FC = () => {
 
           <button
             type="submit"
-            disabled={isLoading || !username.trim() || !password.trim()}
+            disabled={isLoading || !email.trim() || !password.trim() || !confirmPassword.trim()}
             style={{
               ...styles.button,
-              ...(isLoading || !username.trim() || !password.trim() ? styles.buttonDisabled : {}),
+              ...(isLoading || !email.trim() || !password.trim() || !confirmPassword.trim() ? styles.buttonDisabled : {}),
             }}
           >
-            {isLoading ? 'Logging in...' : 'Login'}
+            {isLoading ? 'Creating account...' : 'Register'}
           </button>
         </form>
 
         <div style={styles.footer}>
           <p style={styles.footerText}>
-            Don't have an account?{' '}
-            <Link to="/register" style={styles.link}>
-              Register here
+            Already have an account?{' '}
+            <Link to="/login" style={styles.link}>
+              Login here
             </Link>
-          </p>
-          <p style={styles.footerText}>
-            Test email: test@example.com | Test password: test123
           </p>
         </div>
       </div>
@@ -184,8 +207,8 @@ const styles: { [key: string]: React.CSSProperties } = {
     paddingTop: '24px',
   },
   footerText: {
-    fontSize: '12px',
-    color: '#999',
+    fontSize: '14px',
+    color: '#666',
   },
   link: {
     color: '#007bff',
@@ -195,4 +218,4 @@ const styles: { [key: string]: React.CSSProperties } = {
   },
 };
 
-export default Login;
+export default Register;

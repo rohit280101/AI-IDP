@@ -1,5 +1,6 @@
 from pydantic_settings import BaseSettings
 import os
+from pathlib import Path
 
 class Settings(BaseSettings):
     PROJECT_NAME: str = "AI Document Processing Platform"
@@ -11,9 +12,11 @@ class Settings(BaseSettings):
 
     # Support both Docker (PostgreSQL) and local development (SQLite)
     # Set DATABASE_URL env var to override, default to SQLite for local dev
+    _base_dir = Path(__file__).resolve().parents[2]
+    _sqlite_path = _base_dir / "docai.db"
     DATABASE_URL: str = os.getenv(
         "DATABASE_URL",
-        "sqlite:///./docai.db"  # SQLite for local development
+        f"sqlite:///{_sqlite_path.as_posix()}"  # SQLite for local development
     )
 
     REDIS_URL: str = os.getenv("REDIS_URL", "redis://localhost:6379/0")

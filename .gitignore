@@ -1,0 +1,46 @@
+# OS
+.DS_Store
+
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+*.so
+*.egg-info/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
+htmlcov/
+
+# Virtual environments
+.venv/
+venv/
+ENV/
+
+# SQLite / local data
+*.db
+*.sqlite
+*.sqlite3
+
+# Logs
+*.log
+
+# Backend runtime artifacts
+/ai-idp-backend/uploads/
+/ai-idp-backend/app/storage/vector_store/
+
+# Env files
+.env
+.env.*
+
+# Node / frontend
+node_modules/
+dist/
+build/
+.vite/
+
+# IDE
+.vscode/
+.idea/

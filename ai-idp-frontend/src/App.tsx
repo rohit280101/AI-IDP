@@ -3,6 +3,7 @@ import { BrowserRouter as Router, Route, Switch, Link, useLocation } from 'react
 import { AuthProvider, useAuth } from './context/AuthContext';
 import Home from './pages/Home';
 import Login from './pages/Login';
+import Register from './pages/Register';
 import Documents from './pages/Documents';
 import Dashboard from './pages/Dashboard';
 import ProtectedRoute from './components/ProtectedRoute';
@@ -13,8 +14,8 @@ const Navigation: React.FC = () => {
 
   const isActive = (path: string) => location.pathname === path;
 
-  // Don't show navigation on login page
-  if (location.pathname === '/login') {
+  // Don't show navigation on login/register page
+  if (location.pathname === '/login' || location.pathname === '/register') {
     return null;
   }
 
@@ -73,7 +74,7 @@ const Navigation: React.FC = () => {
 
 const AppContent: React.FC = () => {
   const location = useLocation();
-  const { isAuthenticated } = useAuth();
+  const { isAuthenticated: _isAuthenticated } = useAuth();
 
   // Always show login and home routes
   // For other routes, check authentication
@@ -85,12 +86,13 @@ const AppContent: React.FC = () => {
       <main style={styles.main}>
         <Switch>
           <Route path="/login" component={Login} />
+          <Route path="/register" component={Register} />
           <Route path="/" exact component={Home} />
           <ProtectedRoute path="/documents" component={Documents} />
           <ProtectedRoute path="/dashboard" component={Dashboard} />
         </Switch>
       </main>
-      {!isLoginPage && (
+      {!isLoginPage && location.pathname !== '/register' && (
         <footer style={styles.footer}>
           <p style={styles.footerText}>
             AI-IDP Platform &copy; {new Date().getFullYear()} | Intelligent Document Processing
