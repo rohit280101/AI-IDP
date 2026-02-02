@@ -1,0 +1,16 @@
+.git
+.gitignore
+.env.local
+.DS_Store
+*.log
+__pycache__
+*.pyc
+.pytest_cache
+.coverage
+node_modules
+npm-debug.log
+dist
+build
+.vite
+uploads/*
+!uploads/.gitkeep

@@ -1,0 +1,14 @@
+# Placeholder for SSL certificates
+# 
+# For production deployment with HTTPS:
+# 1. Obtain SSL certificates (e.g., from Let's Encrypt)
+# 2. Place your certificate files here:
+#    - cert.pem (or fullchain.pem)
+#    - key.pem (or privkey.pem)
+# 3. Update the paths in nginx.conf accordingly
+#
+# Using Let's Encrypt with Certbot:
+# sudo certbot certonly --standalone -d yourdomain.com
+# Then copy the certificates:
+# cp /etc/letsencrypt/live/yourdomain.com/fullchain.pem ./cert.pem
+# cp /etc/letsencrypt/live/yourdomain.com/privkey.pem ./key.pem

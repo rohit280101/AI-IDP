@@ -1,0 +1,10 @@
+# Uploads Directory
+
+This directory stores uploaded documents.
+
+In production, ensure proper permissions are set:
+```bash
+chmod 755 uploads/
+```
+
+For Docker deployments, this directory is mounted as a volume to persist uploaded files.

@@ -1,0 +1,96 @@
+# Development Docker Compose Configuration
+# For production deployment, use: docker-compose -f docker-compose.prod.yml up -d
+
+version: '3.8'
+
+services:
+  # PostgreSQL Database
+  db:
+    image: postgres:15-alpine
+    container_name: ai-idp-db
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: ai_idp
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+    networks:
+      - ai-idp-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # Redis Cache
+  redis:
+    image: redis:7-alpine
+    container_name: ai-idp-redis
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    networks:
+      - ai-idp-network
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # Backend API
+  backend:
+    build:
+      context: ./ai-idp-backend
+      dockerfile: Dockerfile
+    container_name: ai-idp-backend
+    ports:
+      - "8000:8000"
+    environment:
+      DATABASE_URL: postgresql://postgres:postgres@db:5432/ai_idp
+      REDIS_URL: redis://redis:6379/0
+      JWT_SECRET_KEY: ${JWT_SECRET_KEY:-dev-secret-key-change-in-production}
+      ACCESS_TOKEN_EXPIRE_MINUTES: 60
+      PYTHONUNBUFFERED: 1
+    volumes:
+      - ./ai-idp-backend:/app
+      - ./uploads:/app/uploads
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    networks:
+      - ai-idp-network
+    command: uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
+    restart: unless-stopped
+
+  # Frontend
+  frontend:
+    build:
+      context: ./ai-idp-frontend
+      dockerfile: Dockerfile
+    container_name: ai-idp-frontend
+    ports:
+      - "5173:5173"
+    environment:
+      VITE_API_BASE_URL: http://localhost:8000/api/v1
+    volumes:
+      - ./ai-idp-frontend:/app
+      - /app/node_modules
+      - /app/dist
+    networks:
+      - ai-idp-network
+    depends_on:
+      - backend
+    restart: unless-stopped
+
+networks:
+  ai-idp-network:
+    driver: bridge
+
+volumes:
+  postgres_data:
+  redis_data:
